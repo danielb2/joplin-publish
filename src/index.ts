@@ -92,13 +92,13 @@ internals.registerCommands =  async function() {
 				})
 				console.log(res);
 				console.log(res.data.html_url);
-				await joplin.views.dialogs.setHtml(internals.gistDialog, `<p><a href="${res.data.html_url}">${res.data.html_url}</a></p>`);
+			} catch (e) {
+				console.log(e);
+				await joplin.views.dialogs.setHtml(internals.gistDialog, `<p>${e}</p>`);
 				await joplin.views.dialogs.setButtons(internals.gistDialog, [
 					{ id: "ok", title: "OK" },
 				]);
 				await joplin.views.dialogs.open(internals.gistDialog);
-			} catch (e) {
-				console.log(e);
 			}
 
 		},
