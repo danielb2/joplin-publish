@@ -1,6 +1,8 @@
 import joplin from 'api';
 import { ToolbarButtonLocation, SettingItemType } from 'api/types';
 import { Octokit } from "@octokit/core";
+import { exec } from "child_process";
+import * as os from 'os';
 
 
 const internals = {
@@ -90,8 +92,10 @@ internals.registerCommands =  async function() {
 						'X-GitHub-Api-Version': '2022-11-28'
 					}
 				})
-				console.log(res);
 				console.log(res.data.html_url);
+				if (os.platform() === 'darwin') {
+					exec(`open ${res.data.html_url}`);
+				}
 			} catch (e) {
 				console.log(e);
 				await joplin.views.dialogs.setHtml(internals.gistDialog, `<p>${e}</p>`);
