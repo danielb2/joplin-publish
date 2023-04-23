@@ -11,28 +11,29 @@ const internals = {
 	registerSettings: null,
 	octokit: null,
 	initOctokit: null,
+	gistDialog: null,
 };
 
 
 internals.registerSettings = async function () {
 
 	await joplin.settings.registerSection('Publish', {
-			label: 'Publish',
-			iconName: 'fas fa-calendar-day',
-		});
+		label: 'Publish',
+		iconName: 'fas fa-calendar-day',
+	});
 
-		
-		await joplin.settings.registerSettings({
 
-			'GithubAuthToken': {
-				value: '',
-				type: SettingItemType.String,
-				section: 'Publish',
-				public: true,
-				label: 'github auth token',
-				description: `Get your token from https://github.com/settings/tokens`
-			},
-		});
+	await joplin.settings.registerSettings({
+
+		'GithubAuthToken': {
+			value: '',
+			type: SettingItemType.String,
+			section: 'Publish',
+			public: true,
+			label: 'github auth token',
+			description: `Get your token from https://github.com/settings/tokens`
+		},
+	});
 };
 
 internals.registerToolbarButtons = async function () {
@@ -41,31 +42,32 @@ internals.registerToolbarButtons = async function () {
 };
 
 internals.initOctokit = async function () {
-	 internals.octokit =  new Octokit({
-		 auth: await joplin.settings.value('GithubAuthToken'),
-	 })
+	internals.octokit =  new Octokit({
+		auth: await joplin.settings.value('GithubAuthToken'),
+	})
 }
 
 internals.registerMenu = async function () {
 	await joplin.views.menus.create('publish-menu', 'publish', [
-			{ label: "Publish to Github Gist", commandName: "publishGist", accelerator: "CmdOrCtrl+Alt+D" },
-		]);
+		{ label: "Publish to Github Gist", commandName: "publishGist", accelerator: "CmdOrCtrl+Alt+D" },
+	]);
 };
 
 internals.onStart = async function() {
-	 await internals.registerCommands();
-	 // await internals.registerMenu();
-	 await internals.registerToolbarButtons();
-	 await internals.registerSettings();
+	await internals.registerCommands();
+	// await internals.registerMenu();
+	await internals.registerToolbarButtons();
+	await internals.registerSettings();
 
-	 await internals.initOctokit();
+	await internals.initOctokit();
 
-	 joplin.settings.onChange(async (event: any) => {
-		 if (event.keys.indexOf("GithubAuthToken") !== -1) {
-			 console.log("Github Auth Token changed");
-			 await internals.initOctokit();
-		 }
-	 });
+	joplin.settings.onChange(async (event: any) => {
+		if (event.keys.indexOf("GithubAuthToken") !== -1) {
+			console.log("Github Auth Token changed");
+			await internals.initOctokit();
+		}
+	});
+	internals.gistDialog = await joplin.views.dialogs.create('gistDialog');
 }
 
 internals.registerCommands =  async function() {
@@ -88,9 +90,15 @@ internals.registerCommands =  async function() {
 						'X-GitHub-Api-Version': '2022-11-28'
 					}
 				})
-			console.log(res);
+				console.log(res);
+				console.log(res.data.html_url);
+				await joplin.views.dialogs.setHtml(internals.gistDialog, `<p><a href="${res.data.html_url}">${res.data.html_url}</a></p>`);
+				await joplin.views.dialogs.setButtons(internals.gistDialog, [
+					{ id: "ok", title: "OK" },
+				]);
+				await joplin.views.dialogs.open(internals.gistDialog);
 			} catch (e) {
-				alert(e);
+				console.log(e);
 			}
 
 		},
