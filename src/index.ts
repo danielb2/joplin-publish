@@ -1,5 +1,5 @@
 import joplin from 'api';
-import { ToolbarButtonLocation } from 'api/types';
+import { ToolbarButtonLocation, SettingItemType } from 'api/types';
 import { Octokit } from "@octokit/core";
 
 
@@ -8,16 +8,43 @@ const internals = {
 	registerCommands: null,
 	registerMenu: null,
 	registerToolbarButtons: null,
-	octokit: new Octokit({
-		auth: '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'
-	})
+	registerSettings: null,
+	octokit: null,
+	initOctokit: null,
+};
 
+
+internals.registerSettings = async function () {
+
+	await joplin.settings.registerSection('Publish', {
+			label: 'Publish',
+			iconName: 'fas fa-calendar-day',
+		});
+
+		
+		await joplin.settings.registerSettings({
+
+			'GithubAuthToken': {
+				value: '',
+				type: SettingItemType.String,
+				section: 'Publish',
+				public: true,
+				label: 'github auth token',
+				description: `Get your token from https://github.com/settings/tokens`
+			},
+		});
 };
 
 internals.registerToolbarButtons = async function () {
 
 	await joplin.views.toolbarButtons.create('publishGistButton', 'publishGist', ToolbarButtonLocation.EditorToolbar);
 };
+
+internals.initOctokit = async function () {
+	 internals.octokit =  new Octokit({
+		 auth: await joplin.settings.value('GithubAuthToken'),
+	 })
+}
 
 internals.registerMenu = async function () {
 	await joplin.views.menus.create('publish-menu', 'publish', [
@@ -26,10 +53,19 @@ internals.registerMenu = async function () {
 };
 
 internals.onStart = async function() {
-	console.info('Hello world. Test plugin started!');
 	 await internals.registerCommands();
 	 // await internals.registerMenu();
 	 await internals.registerToolbarButtons();
+	 await internals.registerSettings();
+
+	 await internals.initOctokit();
+
+	 joplin.settings.onChange(async (event: any) => {
+		 if (event.keys.indexOf("GithubAuthToken") !== -1) {
+			 console.log("Github Auth Token changed");
+			 await internals.initOctokit();
+		 }
+	 });
 }
 
 internals.registerCommands =  async function() {
@@ -41,16 +77,22 @@ internals.registerCommands =  async function() {
 			const currentNote = await joplin.workspace.selectedNote();
 
 			const files = {};
-			files[currentNote.title] = { content: currentNote.body };
+			files[`${currentNote.title}.md`] = { content: currentNote.body };
 
-			await internals.octokit.request('POST /gists', {
-				description: currentNote.title,
-				'public': false,
-				files,
-				headers: {
-					'X-GitHub-Api-Version': '2022-11-28'
-				}
-			})
+			try {
+				const res = await internals.octokit.request('POST /gists', {
+					description: currentNote.title,
+					'public': false,
+					files,
+					headers: {
+						'X-GitHub-Api-Version': '2022-11-28'
+					}
+				})
+			console.log(res);
+			} catch (e) {
+				alert(e);
+			}
+
 		},
 	});
 }
