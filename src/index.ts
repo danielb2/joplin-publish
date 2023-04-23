@@ -1,10 +1,6 @@
 import joplin from 'api';
 import { ToolbarButtonLocation } from 'api/types';
-const Util = require('util');
-import { exec } from "child_process";
-const pexec = Util.promisify(exec);
-// const fs = require('fs').promises;
-
+import { Octokit } from "@octokit/core";
 
 
 const internals = {
@@ -12,6 +8,10 @@ const internals = {
 	registerCommands: null,
 	registerMenu: null,
 	registerToolbarButtons: null,
+	octokit: new Octokit({
+		auth: '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'
+	})
+
 };
 
 internals.registerToolbarButtons = async function () {
@@ -39,10 +39,18 @@ internals.registerCommands =  async function() {
 		iconName: 'fas fa-external-link-alt',
 		execute: async () => {
 			const currentNote = await joplin.workspace.selectedNote();
-			console.log(currentNote);
-			// await fs.writeFile('filename.md', currentNote.body);
-			// const res = await pexec("gh create gist filename.md");
-			// console.log(res);
+
+			const files = {};
+			files[currentNote.title] = { content: currentNote.body };
+
+			await internals.octokit.request('POST /gists', {
+				description: currentNote.title,
+				'public': false,
+				files,
+				headers: {
+					'X-GitHub-Api-Version': '2022-11-28'
+				}
+			})
 		},
 	});
 }
