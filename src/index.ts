@@ -74,7 +74,7 @@ internals.registerCommands =  async function() {
 	await joplin.commands.register({
 		name: "publishGist",
 		label: "Publish Note to Github",
-		iconName: 'fas fa-external-link-alt',
+		iconName: 'fab fa-github fa-fw',
 		execute: async () => {
 			const currentNote = await joplin.workspace.selectedNote();
 
