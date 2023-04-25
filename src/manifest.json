@@ -2,12 +2,12 @@
 	"manifest_version": 1,
 	"id": "org.otherware.joplin-publish",
 	"app_min_version": "2.8",
-	"version": "1.0.0",
+	"version": "1.0.4",
 	"name": "joplin publish",
 	"description": "publish notes to github gist",
-	"author": "",
-	"homepage_url": "",
-	"repository_url": "",
+	"author": "Daniel Bretoi",
+	"homepage_url": "https://github.com/danielb2/joplin-publish",
+	"repository_url": "https://github.com/danielb2/joplin-publish",
 	"keywords": [],
 	"categories": []
 }
