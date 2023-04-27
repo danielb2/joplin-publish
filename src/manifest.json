@@ -8,6 +8,6 @@
 	"author": "Daniel Bretoi",
 	"homepage_url": "https://github.com/danielb2/joplin-publish",
 	"repository_url": "https://github.com/danielb2/joplin-publish",
-	"keywords": ['gist', 'publish', 'share'],
+	"keywords": ["gist", "publish", "share"],
 	"categories": []
 }
