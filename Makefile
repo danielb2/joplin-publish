@@ -8,3 +8,6 @@ debug:
 update:
 	npm install -g yo generator-joplin
 	npm run update
+
+publish:
+	npm publish
