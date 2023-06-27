@@ -1,4 +1,4 @@
-latest:
+run:
 	npm run dist && /Applications/Joplin.app/Contents/MacOS/Joplin --env dev
 
 
