@@ -1,7 +1,10 @@
 import joplin from 'api';
-import { ToolbarButtonLocation, SettingItemType } from 'api/types';
+import { ToolbarButtonLocation, SettingItemType, ModelType } from 'api/types';
 import { Octokit } from "@octokit/core";
 
+// useful links
+// https://joplinapp.org/api/references/plugin_api/classes/joplindata.html
+// https://docs.github.com/en/rest/gists/gists?apiVersion=2022-11-28
 
 const internals = {
 	onStart: null,
@@ -18,7 +21,7 @@ const internals = {
 internals.registerSettings = async function () {
 
 	await joplin.settings.registerSection('Publish', {
-		label: 'Publish',
+		label: 'Publish To Web',
 		iconName: 'fas fa-calendar-day',
 	});
 
@@ -81,18 +84,35 @@ internals.registerCommands =  async function() {
 			const files = {};
 			files[`${currentNote.title}.md`] = { content: currentNote.body };
 
+			const gist_id = await joplin.data.userDataGet(ModelType.Note, currentNote.id, 'publish2web.gist_id')
+
+			let url = 'POST /gists'
+
+			const options:Record<string, any> = {
+				description: currentNote.title,
+				public: false,
+				files,
+				headers: {
+					'X-GitHub-Api-Version': '2022-11-28'
+				}
+			};
+
+			if (gist_id) {
+				url = `PATCH /gists/${gist_id}`
+				delete options.public;
+			}
+
 			try {
-				const res = await internals.octokit.request('POST /gists', {
-					description: currentNote.title,
-					'public': false,
-					files,
-					headers: {
-						'X-GitHub-Api-Version': '2022-11-28'
-					}
-				})
+				const res = await internals.octokit.request(url, options)
+
+				await joplin.data.userDataSet(ModelType.Note, currentNote.id, 'publish2web.gist_id', res.data.id);
 				await joplin.commands.execute('openItem', res.data.html_url);
 			} catch (e) {
-				console.log(e);
+				if (e == 'HttpError: Not Found') {
+					e = 'Gist not found. It got deleted? try again and we will make a new one. Together :)'
+					await joplin.data.userDataDelete(ModelType.Note, currentNote.id, 'publish2web.gist_id');
+				}
+				console.log(e)
 				await joplin.views.dialogs.setHtml(internals.gistDialog, `<p>${e}</p>`);
 				await joplin.views.dialogs.setButtons(internals.gistDialog, [
 					{ id: "ok", title: "OK" },

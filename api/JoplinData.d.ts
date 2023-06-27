@@ -47,4 +47,7 @@ export default class JoplinData {
     delete(path: Path, query?: any): Promise<any>;
     itemType(itemId: string): Promise<ModelType>;
     resourcePath(resourceId: string): Promise<string>;
+    userDataGet<T>(itemType: ModelType, itemId: string, key: string);
+    userDataDelete(itemType: ModelType, itemId: string, key: string): Promise<void>;
+    userDataSet<T>(itemType: ModelType, itemId: string, key: string, value: T);
 }
