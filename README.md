@@ -8,7 +8,11 @@ This plugin provides an easy way to publish your notes on github using gist so t
 
 You'll need to get an auth code from github https://github.com/settings/tokens and you must specificy the gist scope for it to work
 
-You can choose to publish gist as public or private
+You can choose to publish gist as public or private. if you need to change the
+scope, you can delete the gist, change the setting, and make a new one. Once
+it's published as a scope, that's it.
 
 - `github auth token`: The github token you get from the link above
 - `public`: The scope of the gist, either `public` or `private`. default is private
+
+
