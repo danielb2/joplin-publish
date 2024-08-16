@@ -36,6 +36,14 @@ internals.registerSettings = async function () {
 			label: 'github auth token',
 			description: `Get your token from https://github.com/settings/tokens`
 		},
+		'GithubPublic': {
+			value: false,
+			type: SettingItemType.Bool,
+			section: 'Publish',
+			public: true,
+			label: 'public',
+			description: `If you want to publish your notes as public gist, check this box.`
+		},
 	});
 };
 
@@ -90,7 +98,7 @@ internals.registerCommands =  async function() {
 
 			const options:Record<string, any> = {
 				description: currentNote.title,
-				public: false,
+				public: await joplin.settings.value('GithubPublic'),
 				files,
 				headers: {
 					'X-GitHub-Api-Version': '2022-11-28'
