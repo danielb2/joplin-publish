@@ -11,3 +11,5 @@ update:
 
 publish:
 	npm publish
+
+.PHONY: run debug update publish
