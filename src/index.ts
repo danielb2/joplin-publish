@@ -90,7 +90,9 @@ internals.registerCommands =  async function() {
 			const currentNote = await joplin.workspace.selectedNote();
 
 			const files = {};
-			files[`${currentNote.title}.md`] = { content: currentNote.body };
+			// Insert Table of Contents where [toc], if found
+			const preparedBody = insertTableOfContents(currentNote.body);
+			files[`${currentNote.title}.md`] = { content: preparedBody };
 
 			const gist_id = await joplin.data.userDataGet(ModelType.Note, currentNote.id, 'publish2web.gist_id')
 
@@ -132,6 +134,29 @@ internals.registerCommands =  async function() {
 	});
 }
 
+// Helper to replace [toc] with generated TOC (case-insensitive)
+function insertTableOfContents(markdown: string): string {
+	const tocRegex = /\[toc\]/gi;
+	const headingRegex = /^(#{1,6})\s+(.+?)$/gm;
+	const headings = [];
+	let match;
+
+	while ((match = headingRegex.exec(markdown)) !== null) {
+		headings.push({
+			level: match[1].length,
+			text: match[2].trim(),
+			anchor: match[2].trim().toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-')
+		});
+	}
+
+	if (headings.length === 0) return markdown.replace(tocRegex, '');
+
+	let toc = headings.map(h => {
+		return `${'  '.repeat(h.level - 1)}- [${h.text}](#${h.anchor})`;
+	}).join('\n');
+
+	return markdown.replace(tocRegex, toc);
+}
 
 
 joplin.plugins.register({
