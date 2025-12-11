@@ -54,5 +54,6 @@ https://gist.github.com/danielb2/51430701b35539eb4f2e5ac70f1293f3
 
 
 # Change log
+- version 1.3.0 (2025.12.11) [toc] is now converted to table of contents for git
 - version 1.2.0 (2024.08.16) can now choose public or private gist instead of only private
 - version 1.1.0 (2023.06.27) adds ability to modify gists. Clicking the github button will now update a gist thanks to  https://github.com/laurent22/joplin/issues/8080 being implemented
